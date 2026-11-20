@@ -10,11 +10,13 @@ import { handleArticleClick, sanitizeHtml } from "../html";
 import { InplaceSearch } from "../components/InplaceSearch";
 
 /* ================= 吃瓜列表 ================= */
-export function PostsPage({ onBack, wide }: { onBack: () => void; wide: boolean }) {
+export function PostsPage({ onBack, wide, initialCat = "", title }: {
+  onBack: () => void; wide: boolean; initialCat?: string; title?: string;
+}) {
   const { push } = useStore();
   const [searching, setSearching] = useState(false);
   const [cats, setCats] = useState<PostCategory[]>([]);
-  const [cat, setCat] = useState<string>(""); // 空 = 全部
+  const [cat, setCat] = useState<string>(initialCat); // 空 = 全部
   const [items, setItems] = useState<Post[]>([]);
   const [page, setPage] = useState(0);
   const [pages, setPages] = useState(1);
@@ -54,6 +56,7 @@ export function PostsPage({ onBack, wide }: { onBack: () => void; wide: boolean 
     setPage(0);
     setPages(1);
   };
+  const activeName = cats.find((c) => c.route === cat)?.name || title || "吃瓜";
 
   useEffect(() => { loadMore(true); /* eslint-disable-next-line */ }, [cat]);
   useEffect(() => {
@@ -69,8 +72,8 @@ export function PostsPage({ onBack, wide }: { onBack: () => void; wide: boolean 
     <div className="absolute inset-0 bg-bg flex flex-col">
       <div className="shrink-0 flex items-center gap-2 px-2 bg-s1" style={{ paddingTop: "var(--sat, 0px)" }}>
         <button onClick={onBack} className="w-9 h-9 rounded-full flex items-center justify-center text-on hover:bg-s3 pressable"><IBack size={19} /></button>
-        <span className="text-[14px] font-bold text-on">吃瓜</span>
-        <span className="text-[10.5px] text-mut ml-1">圈内爆料</span>
+        <span className="text-[14px] font-bold text-on">{activeName}</span>
+        <span className="text-[10.5px] text-mut ml-1">{cat ? "分类精选" : "圈内爆料"}</span>
         <button onClick={() => setSearching(true)} aria-label="搜索吃瓜帖" className="ml-auto w-9 h-9 rounded-full flex items-center justify-center text-on hover:bg-s3 pressable"><ISearch size={19} /></button>
       </div>
       {cats.length > 0 && (

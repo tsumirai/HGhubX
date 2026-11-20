@@ -30,8 +30,8 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
 
-/// 默认上游：门牌化后没有内置源，必须由用户输入地址激活。
-pub const DEFAULT_BASE: &str = "";
+/// 默认上游；用户仍可在设置中覆盖。
+pub const DEFAULT_BASE: &str = crate::infra::source::DEFAULT_BASE;
 
 /// 当前门牌基址（不带结尾斜杠）。唯一来源是 [`crate::infra::source`]。
 pub fn base() -> String {
@@ -1074,8 +1074,8 @@ mod tests {
     }
 
     #[test]
-    fn default_base_is_empty_until_the_door_is_activated() {
-        assert!(DEFAULT_BASE.is_empty());
+    fn default_base_points_to_huangguoai() {
+        assert_eq!(DEFAULT_BASE, "https://huangguoai.com/");
     }
 
     #[tokio::test]

@@ -27,7 +27,7 @@ export type Page =
   | { kind: "channel"; key: string; cate: string; name: string }
   | { kind: "ranks"; key: string }
   | { kind: "settings"; key: string }
-  | { kind: "posts"; key: string }
+  | { kind: "posts"; key: string; cat?: string; title?: string }
   | { kind: "post"; key: string; id: number }
   | { kind: "topics"; key: string }
   | { kind: "topic"; key: string; slug: string; name: string }
@@ -41,7 +41,7 @@ export type PageInput =
   | { kind: "channel"; cate: string; name: string }
   | { kind: "ranks" }
   | { kind: "settings" }
-  | { kind: "posts" }
+  | { kind: "posts"; cat?: string; title?: string }
   | { kind: "post"; id: number }
   | { kind: "topics" }
   | { kind: "topic"; slug: string; name: string }
@@ -267,7 +267,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setStack([]);
     setTabRaw("home");
-    setSiteBase("");
+    setSiteBase(next.base);
   }, []);
 
   const setStrictSecurity = useCallback(async (on: boolean) => {

@@ -42,7 +42,7 @@ export default function GateDialog({ open, onClose }: { open: boolean; onClose: 
           </button>
         </div>
         <button onClick={() => { void resetGate().then(onClose); }}
-          className="mt-3 w-full text-center text-[11px] text-mut pressable">清除接入地址</button>
+          className="mt-3 w-full text-center text-[11px] text-mut pressable">恢复默认地址</button>
       </div>
     </Modal>
   );

@@ -13,7 +13,8 @@ const fixture = {
   ready: false,
   setActive: (_active: boolean) => {},
   complete(cmd: string, key: string, result: "404" | "503" | "empty" | "item") {
-    const index = pending.findIndex(r => r.cmd === cmd && (!key || r.args.cate === key));
+    const keyField = cmd === "api_post_category" ? "route" : "cate";
+    const index = pending.findIndex(r => r.cmd === cmd && (!key || r.args[keyField] === key));
     if (index < 0) throw new Error(`No pending request: ${cmd}/${key}`);
     const request = pending.splice(index, 1)[0];
     if (result === "404" || result === "503") {
@@ -38,13 +39,13 @@ Object.assign(window, {
     if (cmd === "gate_state") return Promise.resolve({ base: "https://fixture.invalid", adapter: "edge_v1", activated: true });
     if (cmd === "data_call") {
       const command = (args.command || {}) as Record<string, unknown>;
-      const map: Record<string, string> = { boot: "app_boot", feed: "api_feed", category: "api_category", posts: "api_posts", search_hot: "api_search_hot", play: "api_play" };
+      const map: Record<string, string> = { boot: "app_boot", feed: "api_feed", category: "api_category", posts: "api_posts", post_category: "api_post_category", search_hot: "api_search_hot", play: "api_play" };
       cmd = map[String(command.cmd)] || String(command.cmd);
       args = { ...command }; delete (args as Record<string, unknown>).cmd;
     }
     if (cmd === "app_boot") return Promise.resolve({ user: null, logged_in: false, base: "https://fixture.invalid" });
     if (cmd === "debug_log") { fixture.debug.push(String(args.msg)); return Promise.resolve(); }
-    if (!["api_feed", "api_category", "api_posts"].includes(cmd)) return Promise.reject(`Unexpected IPC: ${cmd}`);
+    if (!["api_feed", "api_category", "api_posts", "api_post_category"].includes(cmd)) return Promise.reject(`Unexpected IPC: ${cmd}`);
     fixture.history.push({ cmd, args });
     return new Promise((resolve, reject) => pending.push({ cmd, args, resolve, reject }));
   } },

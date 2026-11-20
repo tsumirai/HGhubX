@@ -47,6 +47,26 @@ Windows / macOS / Android 三端 · Fluent 设计 · 沉浸式竖屏播放
 - 使用者应自行遵守所在地法律法规；因使用本项目产生的任何后果由使用者自行承担。
 - 若相关权利方认为本项目存在侵权，请通过 Issue 联系，我们会及时处理。
 
+## 上游 API 接口索引
+
+以下路径均相对于设置中的**当前接入源**，不是固定域名。镜像站点需要兼容相同的路径与响应结构。
+
+| 用途 | 请求 | 路径 | 主要响应字段 | 项目状态 |
+| --- | --- | --- | --- | --- |
+| 视频分类目录 | `GET` | `/api/site/categories/video` | `data.items[]`：`id`、`index`、`name`、`route`、`sort` | 已从站点验证，当前客户端尚未接入 |
+| 吃瓜分类目录 | `GET` | `/api/site/categories/post` | `data.items[]`：`id`、`intro`、`name`、`route`、`sort` | 已接入 `api_post_categories` |
+
+分类目录只描述站点配置，不代表分类内容一定可用。获取分类内容时继续使用：
+
+- 视频：`GET /api/videos/category/{route}?page={page}&size={size}`
+- 吃瓜：`GET /api/posts/category/{route}?page={page}&size={size}`
+
+需要注意：`/api/videos/categories` 不是分类目录接口；当前客户端仍将视频分类入口硬编码在
+[`src/pages/Category.tsx`](src/pages/Category.tsx)。吃瓜分类的数据调用见
+[`src-tauri/src/api.rs`](src-tauri/src/api.rs) 与
+[`src-tauri/src/adapters/edge_v1/mod.rs`](src-tauri/src/adapters/edge_v1/mod.rs)。
+上游接口不是稳定契约，路径或响应可能在未通知的情况下变化；接入新功能时应保留空数据和 HTTP 错误处理。
+
 ## License
 
 [PolyForm Noncommercial License 1.0.0](LICENSE) —— **仅限非商业用途**。

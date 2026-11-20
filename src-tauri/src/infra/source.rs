@@ -8,6 +8,9 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use std::sync::RwLock;
 
+/// 默认接入的稳定上游；用户仍可在设置中换成任意数据源。
+pub const DEFAULT_BASE: &str = "https://huangguoai.com/";
+
 pub const ADAPTER_EDGE_V1: &str = "edge_v1";
 pub const SOURCE_FILE: &str = "source.json";
 
@@ -32,7 +35,7 @@ impl SourceConfig {
     }
 }
 
-/// 给前端的门牌状态；未配置时 `activated=false`，`base` 为空。
+/// 给前端的门牌状态；默认启用内置上游，仍可由用户修改。
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct GateState {
     pub base: String,
@@ -43,14 +46,16 @@ pub struct GateState {
 impl Default for GateState {
     fn default() -> Self {
         Self {
-            base: String::new(),
+            base: DEFAULT_BASE.to_string(),
             adapter: default_adapter(),
-            activated: false,
+            activated: true,
         }
     }
 }
 
 static SOURCE: Lazy<RwLock<Option<SourceConfig>>> = Lazy::new(|| RwLock::new(None));
+static DEFAULT_SOURCE: Lazy<SourceConfig> =
+    Lazy::new(|| SourceConfig::new(DEFAULT_BASE.to_string()));
 static SOURCE_FILE_PATH: Lazy<RwLock<Option<PathBuf>>> = Lazy::new(|| RwLock::new(None));
 
 /// 启动时绑定应用数据目录，并读回上次保存的门牌。
@@ -124,24 +129,24 @@ pub fn gate_state() -> GateState {
     }
 }
 
-/// 复位门牌：清空内存并删除落盘配置。
+/// 复位门牌：删除自定义落盘配置并恢复内置默认源。
 pub fn gate_reset() -> GateState {
     if let Ok(mut cur) = SOURCE.write() {
-        *cur = None;
+        *cur = Some(DEFAULT_SOURCE.clone());
     }
     if let Some(path) = SOURCE_FILE_PATH.read().ok().and_then(|p| p.clone()) {
         let _ = std::fs::remove_file(path);
     }
-    GateState::default()
+    gate_state()
 }
 
-/// 当前基址（未配置时为空串）。这是 `net::base()` 的唯一来源。
+/// 当前基址。配置异常时回退到内置默认源。这是 `net::base()` 的唯一来源。
 pub fn base() -> String {
     SOURCE
         .read()
         .ok()
         .and_then(|cur| cur.as_ref().map(|c| c.base.clone()))
-        .unwrap_or_default()
+        .unwrap_or_else(|| DEFAULT_BASE.to_string())
 }
 
 /// 判断某个请求 origin 是否就是当前门牌（用于凭据只发给当前源）。
@@ -176,12 +181,20 @@ mod tests {
     }
 
     #[test]
+    fn default_source_is_huangguoai() {
+        assert_eq!(gate_state().base, "https://huangguoai.com/");
+        assert_eq!(base(), "https://huangguoai.com/");
+    }
+
+    #[test]
     fn gate_open_accepts_any_non_empty_address() {
         let state = gate_open(" example.com ").unwrap();
         assert_eq!(state.base, "https://example.com/");
         assert_eq!(state.adapter, ADAPTER_EDGE_V1);
         assert!(state.activated);
         gate_reset();
-        assert!(!gate_state().activated);
+        let reset = gate_state();
+        assert!(reset.activated);
+        assert_eq!(reset.base, "https://huangguoai.com/");
     }
 }

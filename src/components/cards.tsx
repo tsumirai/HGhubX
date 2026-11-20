@@ -1,7 +1,7 @@
 import React from "react";
 import { cover, fmt } from "../api";
-import type { VideoCard } from "../types";
-import { IHeartF, IPlayF } from "../icons";
+import type { Post, VideoCard } from "../types";
+import { IFireF, IHeartF, IPlayF } from "../icons";
 import { Img } from "./ui";
 
 /* ——— 瀑布流卡片 ——— */
@@ -63,6 +63,24 @@ export function RowCard({ v, onOpen }: { v: VideoCard; onOpen: () => void }) {
       </div>
       <div className="mt-1.5 text-[11.5px] font-medium text-on clamp-1 leading-tight">{v.title}</div>
       <div className="text-[10px] text-mut clamp-1 mt-0.5">{v.tags?.slice(0, 2).join(" · ")}</div>
+    </button>
+  );
+}
+
+/* ——— 帖子分类横向卡片：保持分类页视频卡片的尺寸与节奏 ——— */
+export function PostRowCard({ post, onOpen }: { post: Post; onOpen: () => void }) {
+  return (
+    <button onClick={onOpen} className="w-[104px] shrink-0 text-left snap-start pressable group">
+      <div className="relative w-full rounded-(--r-sm) overflow-hidden bg-s1 elev-1" style={{ paddingTop: "133%" }}>
+        <Img src={post.cover} />
+        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/75 to-transparent" />
+        <span className="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded-md text-[8.5px] font-bold brand-grad">原创</span>
+        <span className="absolute bottom-1.5 right-1.5 flex items-center gap-0.5 text-[9px] font-semibold text-white/90 tsh">
+          <IFireF size={9} />{fmt(post.hot)}
+        </span>
+      </div>
+      <div className="mt-1.5 text-[11.5px] font-medium text-on clamp-1 leading-tight">{post.title}</div>
+      <div className="text-[10px] text-mut clamp-1 mt-0.5">{post.tags?.slice(0, 2).join(" · ")}</div>
     </button>
   );
 }

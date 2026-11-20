@@ -109,7 +109,7 @@ function StackPage({ page, onBack, wide, top, bottomInset }: {
   if (page.kind === "channel") return <ChannelPage cate={page.cate} name={page.name} onBack={onBack} wide={wide} />;
   if (page.kind === "ranks") return <RankPage onBack={onBack} wide={wide} />;
   if (page.kind === "settings") return <SettingsPage onBack={onBack} wide={wide} />;
-  if (page.kind === "posts") return <PostsPage onBack={onBack} wide={wide} />;
+  if (page.kind === "posts") return <PostsPage onBack={onBack} wide={wide} initialCat={page.cat} title={page.title} />;
   if (page.kind === "post") return <PostDetail id={page.id} onBack={onBack} active={top} />;
   if (page.kind === "topics") return <TopicsPage onBack={onBack} wide={wide} />;
   if (page.kind === "topic") return <TopicPage slug={page.slug} name={page.name} onBack={onBack} wide={wide} />;
